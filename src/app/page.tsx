@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import FluidBackground from '@/components/FluidBackground';
-import CleanClouds from '@/components/CleanClouds';
+// import CleanClouds from '@/components/CleanClouds'; // Disabled - using aurora instead
 import UmbrellaAnimation from '@/components/UmbrellaAnimation';
 import Scene3D from '@/components/Scene3D';
 import ParallaxLayer from '@/components/ParallaxLayer';
@@ -40,10 +40,7 @@ export default function Home() {
             <FluidBackground />
           </ParallaxLayer>
 
-          {/* Clean 3D Clouds using drei */}
-          <ParallaxLayer depth={0.2} style={{ zIndex: 20 }}>
-            <CleanClouds />
-          </ParallaxLayer>
+          {/* Clouds disabled - using aurora background instead */}
 
           {/* Juno character - positioned in lower area */}
           <ParallaxLayer depth={0.5} style={{ zIndex: 25 }}>
@@ -137,52 +134,14 @@ export default function Home() {
         </Scene3D>
       </section>
 
-      {/* Curved transition from blue to cream */}
-      <div className="relative h-32 bg-gradient-to-b from-[#3d3d8a] to-[#3d3d8a]">
-        <svg className="absolute bottom-0 w-full h-32" viewBox="0 0 1440 128" preserveAspectRatio="none">
-          <path fill="#FAF7F2" d="M0,128 L0,80 Q720,0 1440,80 L1440,128 Z"/>
-        </svg>
-      </div>
-
-      {/* Second Section - Clean cream minimalist like the HTML page */}
+      {/* Next Section - Original dark blue style */}
       <section 
         ref={nextSectionRef}
-        className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center px-6 py-20"
+        className="min-h-screen bg-gradient-to-b from-[#0d0d25] to-[#1a1a3e] flex items-center justify-center"
       >
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Clean minimalist content */}
-          <h2 className="text-4xl md:text-6xl font-semibold text-gray-900 mb-6">
-            Always here for you
-          </h2>
-          <p className="text-lg md:text-xl text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Juno understands what you're going through. Track symptoms, get support, and never feel alone on your health journey.
-          </p>
-          
-          {/* Simple feature highlights - minimal */}
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            {['24/7 Support', 'Symptom Tracking', 'Personalized Care'].map((feature) => (
-              <span 
-                key={feature}
-                className="px-5 py-2.5 bg-white rounded-full text-gray-700 text-sm font-medium shadow-sm border border-gray-100"
-              >
-                {feature}
-              </span>
-            ))}
-          </div>
-
-          {/* App Store button - clean style */}
-          <a 
-            href="#" 
-            className="inline-flex items-center gap-3 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3.5 rounded-2xl transition-all duration-300 hover:scale-105"
-          >
-            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-            </svg>
-            <div className="text-left leading-tight">
-              <div className="text-[10px] opacity-80">Download on the</div>
-              <div className="text-base font-semibold -mt-0.5">App Store</div>
-            </div>
-          </a>
+        <div className="text-center text-white px-4">
+          <h2 className="text-4xl md:text-6xl font-bold mb-8">More Coming Soon</h2>
+          <p className="text-xl text-blue-200/70">This is where the rest of your content goes</p>
         </div>
       </section>
     </main>
