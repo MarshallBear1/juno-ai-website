@@ -43,9 +43,10 @@ export default function Home() {
             <UmbrellaAnimation />
           </ParallaxLayer>
 
-          {/* Reviews badge at top */}
+          {/* Reviews at top */}
           <ParallaxLayer depth={0.9} style={{ zIndex: 40 }} className="pointer-events-none">
-            <div className="absolute inset-0 flex justify-center pt-6">
+            <div className="absolute inset-0 flex flex-col items-center pt-6 gap-3">
+              {/* Rating badge */}
               <div
                 className={`transition-all duration-[1200ms] ease-out delay-[2500ms] ${
                   mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
@@ -61,6 +62,27 @@ export default function Home() {
                   </div>
                   <span className="text-white/90 text-sm font-medium">4.9 on the App Store</span>
                 </div>
+              </div>
+
+              {/* Short reviews */}
+              <div
+                className={`flex flex-wrap justify-center gap-2 px-4 max-w-2xl transition-all duration-[1500ms] ease-out delay-[3000ms] ${
+                  mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+                }`}
+              >
+                {[
+                  "Finally, I feel understood",
+                  "Like talking to a friend",
+                  "My daily companion",
+                  "So gentle and caring",
+                ].map((review, i) => (
+                  <span
+                    key={i}
+                    className="text-white/70 text-xs italic px-3 py-1 bg-white/5 rounded-full border border-white/10"
+                  >
+                    "{review}"
+                  </span>
+                ))}
               </div>
             </div>
           </ParallaxLayer>
