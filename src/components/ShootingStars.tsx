@@ -2,15 +2,21 @@
 
 import { useEffect, useRef } from 'react';
 
-interface Star {
+interface TrailPoint {
   x: number;
   y: number;
-  length: number;
+  opacity: number;
+}
+
+interface Comet {
+  x: number;
+  y: number;
   speed: number;
   opacity: number;
   angle: number;
   active: boolean;
   delay: number;
+  trail: TrailPoint[];
 }
 
 export default function ShootingStars() {
@@ -24,8 +30,7 @@ export default function ShootingStars() {
     if (!ctx) return;
 
     let animationId: number;
-    const stars: Star[] = [];
-    const maxStars = 8;
+    let comet: Comet | null = null;
     let time = 0;
 
     const resize = () => {
@@ -33,106 +38,124 @@ export default function ShootingStars() {
       canvas.height = window.innerHeight;
     };
 
-    const createStar = (): Star => {
-      // Random angle between 20-60 degrees (shooting diagonally down-left or down-right)
-      const goingLeft = Math.random() > 0.5;
-      const angle = goingLeft
-        ? (Math.PI / 180) * (200 + Math.random() * 40) // 200-240 degrees (down-left)
-        : (Math.PI / 180) * (290 + Math.random() * 50); // 290-340 degrees (down-right)
-
+    // Create the slow comet (right to left at 3 seconds)
+    const createComet = (): Comet => {
       return {
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height * 0.3, // Top 30% of screen
-        length: Math.random() * 80 + 40,
-        speed: Math.random() * 8 + 6,
+        x: canvas.width + 50,
+        y: canvas.height * 0.18,
+        speed: 5,
         opacity: 0,
-        angle: angle,
+        angle: Math.PI + (Math.PI / 180) * 6,
         active: false,
-        delay: Math.random() * 300, // Random delay before appearing
+        delay: 180, // 3 seconds at ~60fps
+        trail: [],
       };
-    };
-
-    const initStars = () => {
-      for (let i = 0; i < maxStars; i++) {
-        const star = createStar();
-        star.delay = i * 60 + Math.random() * 100; // Stagger initial delays
-        stars.push(star);
-      }
     };
 
     resize();
     window.addEventListener('resize', resize);
-    initStars();
+    comet = createComet();
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       time++;
 
-      stars.forEach((star, index) => {
-        // Check if star should become active
-        if (!star.active && time > star.delay) {
-          star.active = true;
-          star.opacity = 0;
-        }
+      if (!comet) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
 
-        if (!star.active) return;
+      // Check if comet should become active
+      if (!comet.active && time > comet.delay) {
+        comet.active = true;
+        comet.opacity = 0;
+      }
 
-        // Fade in
-        if (star.opacity < 1) {
-          star.opacity += 0.05;
-        }
-
-        // Move the star
-        star.x += Math.cos(star.angle) * star.speed;
-        star.y += Math.sin(star.angle) * star.speed;
-
-        // Calculate tail end position
-        const tailX = star.x - Math.cos(star.angle) * star.length;
-        const tailY = star.y - Math.sin(star.angle) * star.length;
-
-        // Draw the shooting star with gradient
-        const gradient = ctx.createLinearGradient(tailX, tailY, star.x, star.y);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-        gradient.addColorStop(0.6, `rgba(255, 255, 255, ${star.opacity * 0.3})`);
-        gradient.addColorStop(1, `rgba(255, 255, 255, ${star.opacity * 0.9})`);
-
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(star.x, star.y);
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        // Draw bright head
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-        ctx.fill();
-
-        // Subtle glow around head
-        const glowGradient = ctx.createRadialGradient(
-          star.x, star.y, 0,
-          star.x, star.y, 8
-        );
-        glowGradient.addColorStop(0, `rgba(200, 220, 255, ${star.opacity * 0.5})`);
-        glowGradient.addColorStop(1, 'rgba(200, 220, 255, 0)');
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, 8, 0, Math.PI * 2);
-        ctx.fillStyle = glowGradient;
-        ctx.fill();
-
-        // Reset star if it goes off screen
-        if (
-          star.x < -100 ||
-          star.x > canvas.width + 100 ||
-          star.y > canvas.height * 0.6
-        ) {
-          stars[index] = createStar();
-          stars[index].active = false;
-          stars[index].delay = time + Math.random() * 200 + 50;
+      // Draw and fade the trail (even after comet is gone)
+      comet.trail.forEach((point, i) => {
+        point.opacity -= 0.008; // Slow fade
+        if (point.opacity > 0) {
+          const glowGradient = ctx.createRadialGradient(
+            point.x, point.y, 0,
+            point.x, point.y, 12
+          );
+          glowGradient.addColorStop(0, `rgba(255, 255, 255, ${point.opacity * 0.6})`);
+          glowGradient.addColorStop(0.5, `rgba(200, 220, 255, ${point.opacity * 0.3})`);
+          glowGradient.addColorStop(1, 'rgba(200, 220, 255, 0)');
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 12, 0, Math.PI * 2);
+          ctx.fillStyle = glowGradient;
+          ctx.fill();
         }
       });
+
+      // Remove fully faded trail points
+      comet.trail = comet.trail.filter(p => p.opacity > 0);
+
+      if (!comet.active) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+
+      // Fade in
+      if (comet.opacity < 1) {
+        comet.opacity += 0.04;
+      }
+
+      // Add current position to trail
+      if (time % 2 === 0) {
+        comet.trail.push({
+          x: comet.x,
+          y: comet.y,
+          opacity: comet.opacity * 0.8,
+        });
+      }
+
+      // Move the comet
+      comet.x += Math.cos(comet.angle) * comet.speed;
+      comet.y += Math.sin(comet.angle) * comet.speed;
+
+      // Draw immediate tail behind comet
+      const tailLength = 120;
+      const tailX = comet.x - Math.cos(comet.angle) * tailLength;
+      const tailY = comet.y - Math.sin(comet.angle) * tailLength;
+
+      const gradient = ctx.createLinearGradient(tailX, tailY, comet.x, comet.y);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0.5, `rgba(220, 240, 255, ${comet.opacity * 0.5})`);
+      gradient.addColorStop(1, `rgba(255, 255, 255, ${comet.opacity})`);
+
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(comet.x, comet.y);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Draw comet head
+      ctx.beginPath();
+      ctx.arc(comet.x, comet.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${comet.opacity})`;
+      ctx.fill();
+
+      // Outer glow
+      const glowGradient = ctx.createRadialGradient(
+        comet.x, comet.y, 0,
+        comet.x, comet.y, 20
+      );
+      glowGradient.addColorStop(0, `rgba(255, 255, 250, ${comet.opacity * 0.9})`);
+      glowGradient.addColorStop(0.4, `rgba(200, 230, 255, ${comet.opacity * 0.4})`);
+      glowGradient.addColorStop(1, 'rgba(200, 230, 255, 0)');
+      ctx.beginPath();
+      ctx.arc(comet.x, comet.y, 20, 0, Math.PI * 2);
+      ctx.fillStyle = glowGradient;
+      ctx.fill();
+
+      // Comet head disappears when off screen, but trail keeps fading
+      if (comet.x < -150) {
+        comet.active = false;
+      }
 
       animationId = requestAnimationFrame(animate);
     };
@@ -148,7 +171,7 @@ export default function ShootingStars() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none z-10"
+      className="absolute inset-0 pointer-events-none z-[45]"
     />
   );
 }

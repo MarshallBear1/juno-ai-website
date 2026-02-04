@@ -18,6 +18,12 @@ export default function UmbrellaAnimation() {
     video.play().catch(() => {});
 
     const processFrame = () => {
+      // Stop at 6 seconds
+      if (video.currentTime >= 6) {
+        video.pause();
+        return;
+      }
+
       if (video.paused || video.ended) {
         requestAnimationFrame(processFrame);
         return;
@@ -71,7 +77,7 @@ export default function UmbrellaAnimation() {
   }, []);
 
   return (
-    <div className="absolute bottom-[12%] left-1/2 transform -translate-x-1/2 pointer-events-none">
+    <div className="absolute bottom-[12%] left-[57%] transform -translate-x-1/2 pointer-events-none">
       <video
         ref={videoRef}
         src="/juno.mp4"
@@ -81,10 +87,10 @@ export default function UmbrellaAnimation() {
         playsInline
         className="hidden"
       />
-      <div className="overflow-hidden" style={{ width: '500px' }}>
+      <div className="overflow-hidden" style={{ width: '250px' }}>
         <canvas
           ref={canvasRef}
-          className="w-[500px] h-auto"
+          className="w-[250px] h-auto"
         />
       </div>
     </div>
