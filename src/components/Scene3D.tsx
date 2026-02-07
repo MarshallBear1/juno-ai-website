@@ -50,7 +50,7 @@ export default function Scene3D({ children }: Scene3DProps) {
 
   return (
     <MouseContext.Provider value={smoothPos}>
-      <div className="fixed inset-0 overflow-hidden bg-[#0a0520]">
+      <div className="fixed inset-0 bg-[#0a0520]">
         {children}
       </div>
     </MouseContext.Provider>

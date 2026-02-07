@@ -87,10 +87,10 @@ export default function UmbrellaAnimation() {
         playsInline
         className="hidden"
       />
-      <div className="overflow-hidden" style={{ width: '250px' }}>
+      <div className="relative overflow-visible" style={{ width: '250px' }}>
         <canvas
           ref={canvasRef}
-          className="w-[250px] h-auto"
+          className="relative z-20 w-[250px] h-auto"
         />
       </div>
     </div>

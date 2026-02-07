@@ -6,6 +6,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   overflow-x: hidden;
@@ -14,6 +18,28 @@ body {
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Selection colors */
+::selection {
+  background-color: rgba(249, 115, 22, 0.2);
+  color: inherit;
 }
 
 /* Chat message animation */
@@ -45,4 +71,55 @@ body {
 
 .animate-marquee {
   animation: marquee 25s linear infinite;
+}
+
+@keyframes juno-cloud-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(7px, -10px, 0) scale(1.03);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes juno-cloud-glow {
+  0% {
+    opacity: 0.45;
+    transform: translateX(-50%) scale(0.94);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1.06);
+  }
+  100% {
+    opacity: 0.45;
+    transform: translateX(-50%) scale(0.94);
+  }
+}
+
+.juno-cloud-puff {
+  animation-name: juno-cloud-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.juno-cloud-glow {
+  animation: juno-cloud-glow 6s ease-in-out infinite;
+}
+
+/* Floating animation for iPhone mockup */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }

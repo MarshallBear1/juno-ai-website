@@ -38,16 +38,16 @@ export default function ShootingStars() {
       canvas.height = window.innerHeight;
     };
 
-    // Create the slow comet (right to left at 3 seconds)
+    // Create the slow comet (right to left)
     const createComet = (): Comet => {
       return {
         x: canvas.width + 50,
-        y: canvas.height * 0.18,
-        speed: 5,
+        y: canvas.height * 0.52, // Just above Juno's head
+        speed: 2.5, // Slower
         opacity: 0,
         angle: Math.PI + (Math.PI / 180) * 6,
         active: false,
-        delay: 180, // 3 seconds at ~60fps
+        delay: 120, // 2 seconds at ~60fps (earlier)
         trail: [],
       };
     };

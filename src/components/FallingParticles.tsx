@@ -7,9 +7,9 @@ interface Particle {
   y: number;
   size: number;
   speedY: number;
-  speedX: number;
+  drift: number;
+  phase: number;
   opacity: number;
-  color: string;
 }
 
 export default function FallingParticles() {
@@ -24,86 +24,73 @@ export default function FallingParticles() {
 
     let animationId: number;
     const particles: Particle[] = [];
-    const particleCount = 50;
-
-    const colors = [
-      '#F59E0B', // amber-500
-      '#FBBF24', // amber-400
-      '#FCD34D', // amber-300
-      '#F97316', // orange-500
-      '#FB923C', // orange-400
-      '#FDBA74', // orange-300
-    ];
+    const particleCount = 35; // Fewer particles
 
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
 
-    const createParticle = (): Particle => ({
+    const createParticle = (startAtTop = true): Particle => ({
       x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
-      size: Math.random() * 4 + 2,
-      speedY: Math.random() * 0.8 + 0.3,
-      speedX: Math.random() * 0.4 - 0.2,
-      opacity: Math.random() * 0.7 + 0.3,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      y: startAtTop ? -20 : Math.random() * canvas.height,
+      size: Math.random() * 2.5 + 1,
+      speedY: Math.random() * 0.12 + 0.05, // Even slower fall
+      drift: (Math.random() - 0.5) * 0.3, // Gentler drift
+      phase: Math.random() * Math.PI * 2,
+      opacity: Math.random() * 0.5 + 0.2,
     });
 
     const initParticles = () => {
       for (let i = 0; i < particleCount; i++) {
-        const particle = createParticle();
-        particle.y = Math.random() * canvas.height;
-        particles.push(particle);
+        particles.push(createParticle(false));
       }
     };
 
-    resize();
-    window.addEventListener('resize', resize);
-    initParticles();
+    let time = 0;
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time += 0.01;
 
       particles.forEach((particle, index) => {
-        // Update position
+        // Update position - slow dreamy fall
         particle.y += particle.speedY;
-        particle.x += particle.speedX;
 
-        // Add subtle floating motion
-        particle.x += Math.sin(particle.y * 0.01) * 0.3;
+        // Gentle sine wave drift
+        particle.x += Math.sin(time + particle.phase) * particle.drift * 0.5;
 
         // Reset particle if it goes off screen
         if (particle.y > canvas.height + 20) {
-          particles[index] = createParticle();
+          particles[index] = createParticle(true);
         }
 
-        // Draw particle with glow effect
+        // Wrap horizontally
+        if (particle.x < -20) particle.x = canvas.width + 20;
+        if (particle.x > canvas.width + 20) particle.x = -20;
+
+        // Draw particle with soft glow
         ctx.save();
-        ctx.globalAlpha = particle.opacity;
 
         // Outer glow
+        const glowSize = particle.size * 4;
         const gradient = ctx.createRadialGradient(
-          particle.x,
-          particle.y,
-          0,
-          particle.x,
-          particle.y,
-          particle.size * 2
+          particle.x, particle.y, 0,
+          particle.x, particle.y, glowSize
         );
-        gradient.addColorStop(0, particle.color);
-        gradient.addColorStop(0.5, particle.color + '80');
-        gradient.addColorStop(1, 'transparent');
+        gradient.addColorStop(0, `rgba(251, 191, 36, ${particle.opacity * 0.8})`);
+        gradient.addColorStop(0.3, `rgba(251, 191, 36, ${particle.opacity * 0.3})`);
+        gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
 
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size * 2, 0, Math.PI * 2);
+        ctx.arc(particle.x, particle.y, glowSize, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
         ctx.fill();
 
-        // Core circle
+        // Core - bright center
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = particle.color;
+        ctx.fillStyle = `rgba(255, 230, 150, ${particle.opacity})`;
         ctx.fill();
 
         ctx.restore();
@@ -112,9 +99,17 @@ export default function FallingParticles() {
       animationId = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Delay particle appearance by 2.5 seconds
+    const delayTimer = setTimeout(() => {
+      resize();
+      initParticles();
+      animate();
+    }, 2500);
+
+    window.addEventListener('resize', resize);
 
     return () => {
+      clearTimeout(delayTimer);
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(animationId);
     };
